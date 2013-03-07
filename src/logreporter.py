@@ -1,4 +1,5 @@
-#/usr/bin/env python
+#!/usr/bin/env python
+
 """
 logreporter is a simple app that, given a list of log files to check
 will read each log file and report on the number of ERROR entries within
@@ -28,6 +29,8 @@ def load_config():
                         help="comma-separated list of recipients")
     parser.add_argument("--server",
                         help="The address:port of the mail server")
+    parser.add_argument("--hours", type=int, default=24,
+                        help="Accepts log from the previous X hours")
 
     return parser.parse_args()
 
@@ -53,7 +56,7 @@ if __name__ == "__main__":
 
         with open(logfile, 'r') as f:
             items = check_log_file(f)
-            items = itertools.ifilter(filter_date(0, now=rundate), items)
+            items = itertools.ifilter(filter_date(args.hours, now=rundate), items)
             block = generate_block(logfile, list(items))
             text_blocks.append(block)
 
