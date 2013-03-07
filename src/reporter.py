@@ -14,7 +14,7 @@ def load_data(datalist):
     data['appeared'] = 1
     return data
 
-def check_log_file(f, matches=["ERROR"]):
+def check_log_file(f, matches=["ERROR", "WARNI"]):
     """ Loops through the file and checks each line for matches that we
         may be interested in and yields them to the caller """
     last = None
@@ -26,14 +26,10 @@ def check_log_file(f, matches=["ERROR"]):
         m = line_matcher.match(line)
         if m:
             if m.groups(0)[2] in matches:
-                # If we have matched and it is an error, add any previous
-                # ERROR to the list before loading a new one
                 if last:
-                    #items.append(last)
                     yield last
                 last = load_data(m.groups(0))
             elif last:
-                # This isn't an error, but we have one from the last run
                 yield last
                 last = None
         else:
