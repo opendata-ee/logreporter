@@ -14,7 +14,7 @@ def load_data(datalist):
     data['appeared'] = 1
     return data
 
-def check_log_file(f, matches=["ERROR", "WARNI"]):
+def check_log_file(f, matches=["ERROR"]):
     """ Loops through the file and checks each line for matches that we
         may be interested in and yields them to the caller """
     last = None
