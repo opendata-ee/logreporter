@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 
 """
-logreporter is a simple app that, given a list of log files to check
-will read each log file and report on the number of ERROR entries within
-a given time period, 24 hours by default.  Once it has built a list of
-error messages, it tries to group them and then generate a report that
-is emailed to one or more email addresses.
+logreporter.py scans log files for recent error messages and emails out
+a report of them.
 """
 import os, sys
 import datetime
@@ -19,30 +16,29 @@ from reporter import check_log_file, filter_date
 from dateutil import parser as date_parser
 from template import (generate_header, generate_block, generate_footer)
 
-def load_config():
-    parser = argparse.ArgumentParser()
+def get_parser():
+    parser = argparse.ArgumentParser(usage=__doc__)
     parser.add_argument("-l", "--logs",
-                        help="comma-separated list of log files")
+                        help="comma-separated list of log files to scan")
     parser.add_argument("-s", "--sender",
                         help="email address of sender")
     parser.add_argument("-r", "--recipients",
-                        help="comma-separated list of recipients")
+                        help="comma-separated list of email recipients (if none, the report go to stdout)")
     parser.add_argument("--server",
                         help="The address:port of the mail server")
     parser.add_argument("--hours", type=int, default=24,
-                        help="Accepts log from the previous X hours")
+                        help="Accepts log messages from the previous X hours")
 
-    return parser.parse_args()
+    return parser
 
 
 if __name__ == "__main__":
-    args = load_config()
+    parser = get_parser()
+    args = parser.parse_args()
     if not args.logs:
-        print "Log files required, specify a comma-separated list as -l"
-        sys.exit(0)
-    if not args.recipients:
-        print "No recipients specified, provide a comma-separated list to -r"
-        sys.exit(0)
+        print "ERROR Log files required - specify a comma-separated list with -l"
+        parser.print_help()
+        sys.exit(1)
 
     text_blocks = []
 
@@ -62,9 +58,14 @@ if __name__ == "__main__":
 
     header = generate_header(rundate, server=hostname)
     footer = generate_footer()
+    msg_body = "".join([header] + text_blocks + [footer])
+
+    if not args.recipients:
+        print msg_body
+        sys.exit(0)
 
     sender = args.sender if args.sender else "root@{0}".format(hostname)
-    msg = MIMEText("".join([header] + text_blocks + [footer]))
+    msg = MIMEText(msg_body)
     msg['Subject'] = "[LOG REPORT] {0}".format(hostname)
     msg['From'] = sender
     msg['To'] = args.recipients

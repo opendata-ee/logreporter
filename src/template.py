@@ -2,9 +2,9 @@ import os
 
 HEADER = """
 ======================================================================
-Report
-  Generated at {date}
-  On {server}
+Log Report
+  Date: {date}
+  Server: {server}
 ======================================================================
 
 """
@@ -36,7 +36,7 @@ def generate_footer():
 
 def generate_block(logfile, items):
     item_count = len(items)
-    filename = os.path.basename(logfile)
+    filename = logfile
 
     block = OUTER.format(**locals())
 
