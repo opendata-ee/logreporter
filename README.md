@@ -6,16 +6,34 @@ LogReporter is a simple script that scans a list of log files looking for specif
 
 Once the logs have been checked, the script will then email a report of the found errors (if any) to a list of recipients as a plain text email.
 
+This package also contains a script specifically for watching the output of varnishlog for 503 errors.
+
 ## Installation
 
     git clone git://github.com/<username>/logreporter.git
     cd logreporter
     virtualenv .
     . bin/activate
-    pip install -r requirements.txt
-    
+    python setup.py develop
 
-## Running the script
+
+## Running the scripts
+
+### Varnish Watch
+
+`varnish-watch` is used to watch the output of varnishlog for 503 errors.  When the data is piped into `varnish-watch` new records will be written to STDOUT in an apache format (so that it can then be reported on with the logreports).
+
+It is expected that the complete command line will be something like
+
+```
+varnishlog -o | \
+  perl -ne 'BEGIN { $/ = "";} print if (/TxStatus.*(50\d)/);'  | \
+  varnish-watch > varnish-503.log
+    
+```
+
+
+### LogReports
 
 Rather than have a config file (for the moment) the script it managed by a collection of command line arguments that specify what is expected of the script.
 
