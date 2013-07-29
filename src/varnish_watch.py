@@ -13,7 +13,9 @@ what state the current read is in.
 """
 import os
 import re
+import signal
 import sys
+import time
 
 from dateutil import parser as date_parser
 
@@ -29,8 +31,6 @@ STATES = {
     4: (re.compile('.*(ReqEnd).*'), "", 0),
 }
 
-output_fd = None
-
 def write_record(record):
     # 2013-07-01 05:07:34,744 DEBUG [ckanext.dgu.search_indexing] Error
     dt = date_parser.parse(record['date'])
@@ -38,7 +38,13 @@ def write_record(record):
     sys.stdout.write("{date} ERROR [varnish] {url} from {ip_address} generated a 503 for {backend}".format(**record))
     sys.stdout.write('\n')
 
+def signal_handler(signal, frame):
+        sys.exit(0)
+
 def watch():
+    # Cleanly handle ctrl-C
+    signal.signal(signal.SIGINT, signal_handler)
+
     current_state = 0
     current_dict = {}
     line = sys.stdin.readline().strip()
@@ -63,5 +69,12 @@ def watch():
             current_state = STATES[current_state][2]
 
         line = sys.stdin.readline().strip()
+        while len(line) == 0:
+            # Keep reading after sleeping for a short while.
+            time.sleep(0.5)
+            line = sys.stdin.readline().strip()
+
+
+
 
 
