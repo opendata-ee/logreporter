@@ -37,6 +37,8 @@ def check_log_file(f, matches=["ERROR"]):
             # Not a match, but we potentially have a previous dict to add to
             if last:
                 last['extra'] = last.get("extra","") + line
+    if last:
+        yield last
 
 def filter_date(hours, now=datetime.datetime.now()):
     """ Returns a function (using the allowed date as a closure) suitable for
