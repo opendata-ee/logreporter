@@ -4,6 +4,7 @@ from dateutil import parser as date_parser
 
 
 line_matcher = re.compile("^(\d+-\d+-\d+) (\d+:\d+:\d+),\d+ (\w+)\s*\[(.*)\] (.*)")
+syslog_matcher = re.compile("^\w+ \d+ \d+:\d+:\d+ .* (\d+-\d+-\d+) (\d+:\d+:\d+),\d+ (\w+)\s*\[(.*)\] (.*)")
 
 def load_data(datalist):
     data = {"extra": ""}
@@ -23,7 +24,7 @@ def check_log_file(f, matches=["ERROR"]):
         if not line:
             break
 
-        m = line_matcher.match(line)
+        m = line_matcher.match(line) or syslog_matcher.match(line)
         if m:
             if m.groups(0)[2] in matches:
                 if last:
