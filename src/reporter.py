@@ -4,7 +4,7 @@ from dateutil import parser as date_parser
 
 
 line_matcher = re.compile("^(\d+-\d+-\d+) (\d+:\d+:\d+),\d+ (\w+)\s*\[(.*)\] (.*)")
-syslog_matcher = re.compile("^\w+ \d+ \d+:\d+:\d+ .* (\d+-\d+-\d+) (\d+:\d+:\d+),\d+ (\w+)\s*\[(.*)\] (.*)")
+syslog_matcher = re.compile("^\w+\s{1,2}\d+ \d+:\d+:\d+ .* (\d+-\d+-\d+) (\d+:\d+:\d+),\d+ (\w+)\s*\[(.*)\] (.*)")
 
 def load_data(datalist):
     data = {"extra": ""}
