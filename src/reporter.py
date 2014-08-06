@@ -17,7 +17,7 @@ def load_data(datadict):
     data['appeared'] = 1
     return data
 
-def check_log_file(f, matches=["ERROR", "error"]):
+def check_log_file(f, matches=["ERROR", "error", "500"]):
     """ Loops through the file and checks each line for matches that we
         may be interested in and yields them to the caller """
     last = None
