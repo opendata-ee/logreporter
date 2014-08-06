@@ -5,6 +5,7 @@ from dateutil import parser as date_parser
 
 line_matcher = re.compile("^(\d+-\d+-\d+) (\d+:\d+:\d+),\d+ (\w+)\s*\[(.*)\] (.*)")
 syslog_matcher = re.compile("^\w+\s{1,2}\d+ \d+:\d+:\d+ .* (\d+-\d+-\d+) (\d+:\d+:\d+),\d+ (\w+)\s*\[(.*)\] (.*)")
+apache_error_matcher = re.compile("\[(\w{3} \w{3} \d+) (\d+:\d+:\d+ \d{4})\] \[(error)\] \[client (\d+\.\d+\.\d+\.\d+)\] (.*)")
 
 def load_data(datalist):
     data = {"extra": ""}
@@ -15,7 +16,7 @@ def load_data(datalist):
     data['appeared'] = 1
     return data
 
-def check_log_file(f, matches=["ERROR"]):
+def check_log_file(f, matches=["ERROR", "error"]):
     """ Loops through the file and checks each line for matches that we
         may be interested in and yields them to the caller """
     last = None
@@ -24,7 +25,7 @@ def check_log_file(f, matches=["ERROR"]):
         if not line:
             break
 
-        m = line_matcher.match(line) or syslog_matcher.match(line)
+        m = line_matcher.match(line) or syslog_matcher.match(line) or apache_error_matcher.match(line)
         if m:
             if m.groups(0)[2] in matches:
                 if last:
