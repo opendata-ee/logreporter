@@ -3,16 +3,17 @@ import datetime
 from dateutil import parser as date_parser
 
 
-line_matcher = re.compile("^(\d+-\d+-\d+) (\d+:\d+:\d+),\d+ (\w+)\s*\[(.*)\] (.*)")
-syslog_matcher = re.compile("^\w+\s{1,2}\d+ \d+:\d+:\d+ .* (\d+-\d+-\d+) (\d+:\d+:\d+),\d+ (\w+)\s*\[(.*)\] (.*)")
-apache_error_matcher = re.compile("\[(\w{3} \w{3} \d+) (\d+:\d+:\d+ \d{4})\] \[(error)\] \[client (\d+\.\d+\.\d+\.\d+)\] (.*)")
+line_matcher = re.compile("^(?P<date>\d+-\d+-\d+ \d+:\d+:\d+),\d+ (?P<status>\w+)\s*\[(?P<who>.*)\] (?P<message>.*)")
+syslog_matcher = re.compile("^\w+\s{1,2}\d+ \d+:\d+:\d+ .* (?P<date>\d+-\d+-\d+ \d+:\d+:\d+),\d+ (?P<status>\w+)\s*\[(?P<who>.*)\] (?P<message>.*)")
+apache_error_matcher = re.compile("\[(?P<date>\w{3} \w{3} \d+ \d+:\d+:\d+ \d{4})\] \[(?P<status>error)\] \[client (?P<who>\d+\.\d+\.\d+\.\d+)\] (?P<message>.*)")
+apache_matcher = re.compile("(?P<who>\d+\.\d+\.\d+.\d+) - - \[(?P<date>.*)\] \"(?P<message>.*)\" (?P<status>\d{3}) \d+ \"-\" \"-\"")
 
-def load_data(datalist):
+def load_data(datadict):
     data = {"extra": ""}
-    data['when'] = date_parser.parse("%s %s" % datalist[0:2])
-    data['level'] = datalist[2]
-    data['who'] = datalist[3]
-    data['message'] = datalist[4]
+    data['when'] = date_parser.parse(datadict.get('date'), fuzzy=True)
+    data['level'] = datadict.get('status')
+    data['who'] = datadict.get('who', '')
+    data['message'] = datadict.get('message', '')
     data['appeared'] = 1
     return data
 
@@ -25,12 +26,15 @@ def check_log_file(f, matches=["ERROR", "error"]):
         if not line:
             break
 
-        m = line_matcher.match(line) or syslog_matcher.match(line) or apache_error_matcher.match(line)
+        m = (line_matcher.match(line) or 
+             syslog_matcher.match(line) or 
+             apache_error_matcher.match(line) or
+             apache_matcher.match(line))
         if m:
-            if m.groups(0)[2] in matches:
+            if m.groupdict()['status'] in matches:
                 if last:
                     yield last
-                last = load_data(m.groups(0))
+                last = load_data(m.groupdict())
             elif last:
                 yield last
                 last = None
