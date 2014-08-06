@@ -10,7 +10,7 @@ apache_matcher = re.compile("(?P<who>\d+\.\d+\.\d+.\d+) - - \[(?P<date>.*)\] \"(
 
 def load_data(datadict):
     data = {"extra": ""}
-    data['when'] = date_parser.parse(datadict.get('date'), fuzzy=True)
+    data['when'] = date_parser.parse(datadict.get('date'), fuzzy=True, ignoretz=True)
     data['level'] = datadict.get('status')
     data['who'] = datadict.get('who', '')
     data['message'] = datadict.get('message', '')
