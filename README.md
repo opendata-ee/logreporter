@@ -1,6 +1,6 @@
 # logreporter
 
-Getting emails with every single occurrence of an error is a bit of a pain.
+Getting emails with every single occurrence of an error is a bit of a pain .
 
 LogReporter is a simple script that scans a list of log files looking for specific types of messages.  Currently this involves looking for messages that are logged in a specific format and for specific tags.
 
