@@ -6,7 +6,7 @@ LogReporter is a simple script that scans a list of log files looking for specif
 
 Once the logs have been checked, the script will then email a report of the found errors (if any) to a list of recipients as a plain text email.
 
-This package also contains a script specifically for watching the output of varnishlog for 503 errors.
+This package also contains a script specifically for watching the output of varnishlog for 503 errors .
 
 ## Installation
 
